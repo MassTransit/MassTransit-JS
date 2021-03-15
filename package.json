@@ -1,8 +1,8 @@
 {
-  "name": "mtjs",
+  "name": "masstransit-rabbitmq",
   "version": "0.1.0",
-  "description": "MassTransit Node Interoperability",
-  "main": "index.js",
+  "description": "MassTransit for JavaScript, RabbitMQ",
+  "main": "bus.js",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build"
