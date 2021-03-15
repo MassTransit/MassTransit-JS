@@ -8,6 +8,7 @@ import {ConnectionContext} from "./connectionContext"
 import {Guid} from "guid-typescript"
 import {MessageMap} from "./serialization"
 import {RequestClient} from "./requestClient"
+import {MessageType} from "./messageType"
 
 export interface Bus {
     brokerUrl: string
@@ -22,7 +23,7 @@ export interface Bus {
 
     sendEndpoint(args: SendEndpointArguments): SendEndpoint
 
-    requestClient<TRequest extends MessageMap, TResponse extends MessageMap>(args: SendEndpointArguments, requestType: string, responseType: string): RequestClient<TRequest, TResponse>
+    requestClient<TRequest extends MessageMap, TResponse extends MessageMap>(args: RequestClientArguments): RequestClient<TRequest, TResponse>
 
     stop(): Promise<void>
 
@@ -143,11 +144,11 @@ class MassTransitBus extends EventEmitter implements Bus {
         return this.busEndpoint.sendEndpoint(args)
     }
 
-    requestClient<TRequest extends MessageMap, TResponse extends MessageMap>(args: SendEndpointArguments, requestType: string, responseType: string): RequestClient<TRequest, TResponse> {
+    requestClient<TRequest extends MessageMap, TResponse extends MessageMap>(args: RequestClientArguments): RequestClient<TRequest, TResponse> {
 
         let sendEndpoint = this.busEndpoint.sendEndpoint(args)
 
-        return new RequestClient<TRequest, TResponse>(this.busEndpoint, sendEndpoint, requestType, responseType)
+        return new RequestClient<TRequest, TResponse>(this.busEndpoint, sendEndpoint, args.requestType, args.responseType)
     }
 
     /**
@@ -172,6 +173,11 @@ class MassTransitBus extends EventEmitter implements Bus {
 
         return endpoint
     }
+}
+
+export interface RequestClientArguments extends SendEndpointArguments {
+    requestType: MessageType
+    responseType: MessageType
 }
 
 interface BusOptions {

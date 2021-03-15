@@ -7,6 +7,7 @@ import {MessageMap, MessageTypeDeserializer} from "./serialization"
 import {SendEndpoint} from "./sendEndpoint"
 import {SendEndpointArguments, Transport} from "./transport"
 import {ChannelContext} from "./channelContext"
+import {MessageType} from "./messageType"
 
 /**
  * Configure the receive endpoint, including any message handlers
@@ -15,7 +16,7 @@ export interface ReceiveEndpointConfigurator {
     queueName: string
     options: ReceiveEndpointOptions
 
-    handle<T extends MessageMap>(messageType: string, listener: (message: ConsumeContext<T>) => void): this
+    handle<T extends MessageMap>(messageType: MessageType, listener: (message: ConsumeContext<T>) => void): this
 }
 
 export interface ReceiveEndpoint {
@@ -41,13 +42,18 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
         this.on("channel", (context) => this.onChannel(context))
     }
 
-    handle<T extends Record<string, any>>(messageType: string, listener: (message: ConsumeContext<T>) => void): this {
+    handle<T extends Record<string, any>>(messageType: MessageType, listener: (message: ConsumeContext<T>) => void): this {
 
-        if (this._messageTypes.hasOwnProperty(messageType)) {
-            this._messageTypes[messageType].on(listener)
+        if (!messageType)
+            throw new Error(`Invalid argument: messageType`)
+
+        let typeName = messageType.toString()
+
+        if (this._messageTypes.hasOwnProperty(typeName)) {
+            this._messageTypes[typeName].on(listener)
         } else {
             let deserializer = new MessageTypeDeserializer<T>(this)
-            this._messageTypes[messageType] = deserializer
+            this._messageTypes[typeName] = deserializer
             deserializer.on(listener)
         }
 

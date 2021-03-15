@@ -20,5 +20,4 @@ export declare class SendContext<T extends object> implements SendContext<T> {
     host?: Host;
     message: T;
     constructor(message: T);
-    setMessageType(name: string, ns: string): void;
 }

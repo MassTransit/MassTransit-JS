@@ -4,13 +4,14 @@ import { ConsumeContext } from "./consumeContext";
 import { MessageMap } from "./serialization";
 import { SendEndpoint } from "./sendEndpoint";
 import { SendEndpointArguments, Transport } from "./transport";
+import { MessageType } from "./messageType";
 /**
  * Configure the receive endpoint, including any message handlers
  */
 export interface ReceiveEndpointConfigurator {
     queueName: string;
     options: ReceiveEndpointOptions;
-    handle<T extends MessageMap>(messageType: string, listener: (message: ConsumeContext<T>) => void): this;
+    handle<T extends MessageMap>(messageType: MessageType, listener: (message: ConsumeContext<T>) => void): this;
 }
 export interface ReceiveEndpoint {
     sendEndpoint(args: SendEndpointArguments): SendEndpoint;
@@ -21,7 +22,7 @@ export declare class ReceiveEndpoint extends Transport implements ReceiveEndpoin
     private readonly _messageTypes;
     address: string;
     constructor(bus: Bus, queueName: string, options?: ReceiveEndpointOptions);
-    handle<T extends Record<string, any>>(messageType: string, listener: (message: ConsumeContext<T>) => void): this;
+    handle<T extends Record<string, any>>(messageType: MessageType, listener: (message: ConsumeContext<T>) => void): this;
     emitMessage(msg: ConsumeMessage): void;
     private onChannel;
     private configureTopology;

@@ -49,15 +49,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var bus_1 = __importDefault(require("../src/bus"));
 var guid_typescript_1 = require("guid-typescript");
 var readline_1 = __importDefault(require("readline"));
+var messageType_1 = require("../lib/messageType");
+messageType_1.MessageType.setDefaultNamespace("Contracts");
 var bus = bus_1.default();
 bus.receiveEndpoint("orders", function (endpoint) {
-    endpoint.handle("urn:message:Contracts:SubmitOrder", function (context) { return __awaiter(void 0, void 0, void 0, function () {
+    endpoint.handle(new messageType_1.MessageType("SubmitOrder"), function (context) { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     console.log("Order submission received, OrderId:", context.message.OrderId, "Amount:", context.message.Amount);
                     return [4 /*yield*/, context.respond({ OrderId: context.message.OrderId }, function (send) {
-                            send.setMessageType("OrderSubmitted", "Contracts");
+                            send.messageType = new messageType_1.MessageType("OrderSubmitted").toMessageType();
                         })];
                 case 1:
                     _a.sent();
@@ -66,7 +68,11 @@ bus.receiveEndpoint("orders", function (endpoint) {
         });
     }); });
 });
-var client = bus.requestClient({ queue: "orders" }, "urn:message:Contracts:SubmitOrder", "urn:message:Contracts:OrderSubmitted");
+var client = bus.requestClient({
+    exchange: "orders",
+    requestType: new messageType_1.MessageType("SubmitOrder"),
+    responseType: new messageType_1.MessageType("OrderSubmitted"),
+});
 var submitOrder = setInterval(function () { return __awaiter(void 0, void 0, void 0, function () {
     var response, e_1;
     return __generator(this, function (_a) {

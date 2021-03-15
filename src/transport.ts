@@ -79,8 +79,8 @@ export class Transport extends EventEmitter implements Transport {
 
         let destination = exchange
         if (!destination || destination === "")
-            destination = routingKey
 
+            destination = routingKey
         send.destinationAddress = this.bus.brokerUrl.endsWith("/") ? this.bus.brokerUrl + destination : this.bus.brokerUrl + "/" + destination
 
         const body = this.serializer.serialize(send)

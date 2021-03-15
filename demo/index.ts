@@ -2,22 +2,29 @@ import masstransit from "../src/bus"
 import {Guid} from "guid-typescript"
 import {OrderSubmitted, SubmitOrder} from "./messages"
 import readline from "readline"
+import {MessageType} from "../lib/messageType"
+
+MessageType.setDefaultNamespace("Contracts")
 
 const bus = masstransit()
 
 bus.receiveEndpoint("orders", endpoint => {
 
-    endpoint.handle<SubmitOrder>("urn:message:Contracts:SubmitOrder", async context => {
+    endpoint.handle<SubmitOrder>(new MessageType("SubmitOrder"), async context => {
 
         console.log("Order submission received, OrderId:", context.message.OrderId, "Amount:", context.message.Amount)
 
         await context.respond<OrderSubmitted>({OrderId: context.message.OrderId}, send => {
-            send.setMessageType("OrderSubmitted", "Contracts")
+            send.messageType = new MessageType("OrderSubmitted").toMessageType()
         })
     })
 })
 
-let client = bus.requestClient<SubmitOrder, OrderSubmitted>({queue: "orders"}, "urn:message:Contracts:SubmitOrder", "urn:message:Contracts:OrderSubmitted")
+let client = bus.requestClient<SubmitOrder, OrderSubmitted>({
+    exchange: "orders",
+    requestType: new MessageType("SubmitOrder"),
+    responseType: new MessageType("OrderSubmitted"),
+})
 
 const submitOrder = setInterval(async () => {
     try {
