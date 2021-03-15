@@ -1,7 +1,11 @@
 import { MessageContext } from "./messageContext";
 import { Host } from "./host";
+import { MessageMap } from "./serialization";
+import { SendContext } from "./sendContext";
+import { ReceiveEndpoint } from "./receiveEndpoint";
 export interface ConsumeContext<T extends object> extends MessageContext {
     message: T;
+    respond<T extends MessageMap>(message: T, cb?: (send: SendContext<T>) => void): Promise<void>;
 }
 export declare class ConsumeContext<T extends object> implements ConsumeContext<T> {
     messageId?: string;
@@ -19,4 +23,5 @@ export declare class ConsumeContext<T extends object> implements ConsumeContext<
     headers?: object;
     host?: Host;
     message: T;
+    receiveEndpoint: ReceiveEndpoint;
 }

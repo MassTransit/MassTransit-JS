@@ -51,23 +51,32 @@ var guid_typescript_1 = require("guid-typescript");
 var readline_1 = __importDefault(require("readline"));
 var bus = bus_1.default();
 bus.receiveEndpoint("orders", function (endpoint) {
-    endpoint.handle("urn:message:Contracts:SubmitOrder", function (context) {
-        console.log("Order Submitted, OrderId:", context.message.OrderId, "Amount:", context.message.Amount);
-    });
+    endpoint.handle("urn:message:Contracts:SubmitOrder", function (context) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    console.log("Order submission received, OrderId:", context.message.OrderId, "Amount:", context.message.Amount);
+                    return [4 /*yield*/, context.respond({ OrderId: context.message.OrderId }, function (send) {
+                            send.setMessageType("OrderSubmitted", "Contracts");
+                        })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    }); });
 });
-var endpoint = bus.sendEndpoint({ queue: "orders" });
+var client = bus.requestClient({ queue: "orders" }, "urn:message:Contracts:SubmitOrder", "urn:message:Contracts:OrderSubmitted");
 var submitOrder = setInterval(function () { return __awaiter(void 0, void 0, void 0, function () {
-    var e_1;
+    var response, e_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, endpoint.send({ OrderId: guid_typescript_1.Guid.create().toString(), Amount: 123.45 }, function (x) {
-                        x.requestId = guid_typescript_1.Guid.create().toString();
-                        x.setMessageType("SubmitOrder", "Contracts");
-                    })];
+                return [4 /*yield*/, client.getResponse({ OrderId: guid_typescript_1.Guid.create().toString(), Amount: 123.45 })];
             case 1:
-                _a.sent();
+                response = _a.sent();
+                console.log("Order submitted", response.message.OrderId);
                 return [3 /*break*/, 3];
             case 2:
                 e_1 = _a.sent();

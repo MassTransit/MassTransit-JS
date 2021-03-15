@@ -107,7 +107,7 @@ var Transport = /** @class */ (function (_super) {
                         destination = exchange;
                         if (!destination || destination === "")
                             destination = routingKey;
-                        send.destinationAddress = this.bus.brokerUrl + "/" + destination;
+                        send.destinationAddress = this.bus.brokerUrl.endsWith("/") ? this.bus.brokerUrl + destination : this.bus.brokerUrl + "/" + destination;
                         body = this.serializer.serialize(send);
                         return [4 /*yield*/, this.basicPublish(exchange, routingKey, body)];
                     case 1:

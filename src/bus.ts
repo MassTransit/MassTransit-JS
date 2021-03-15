@@ -6,6 +6,8 @@ import {delay} from "./util"
 import {SendEndpointArguments} from "./transport"
 import {ConnectionContext} from "./connectionContext"
 import {Guid} from "guid-typescript"
+import {MessageMap} from "./serialization"
+import {RequestClient} from "./requestClient"
 
 export interface Bus {
     brokerUrl: string
@@ -20,6 +22,8 @@ export interface Bus {
 
     sendEndpoint(args: SendEndpointArguments): SendEndpoint
 
+    requestClient<TRequest extends MessageMap, TResponse extends MessageMap>(args: SendEndpointArguments, requestType: string, responseType: string): RequestClient<TRequest, TResponse>
+
     stop(): Promise<void>
 
     restart(): Promise<void>
@@ -27,11 +31,11 @@ export interface Bus {
 
 class MassTransitBus extends EventEmitter implements Bus {
     brokerUrl: string
-    stopped: boolean
+    private stopped: boolean
     private connection?: Promise<Connection>
     private _cancelConnect: any
     private readonly _retryIntervalInSeconds: number
-    private busEndpoint: ReceiveEndpoint
+    private readonly busEndpoint: ReceiveEndpoint
 
     constructor(brokerUrl: string) {
         super()
@@ -137,6 +141,13 @@ class MassTransitBus extends EventEmitter implements Bus {
 
     sendEndpoint(args: SendEndpointArguments): SendEndpoint {
         return this.busEndpoint.sendEndpoint(args)
+    }
+
+    requestClient<TRequest extends MessageMap, TResponse extends MessageMap>(args: SendEndpointArguments, requestType: string, responseType: string): RequestClient<TRequest, TResponse> {
+
+        let sendEndpoint = this.busEndpoint.sendEndpoint(args)
+
+        return new RequestClient<TRequest, TResponse>(this.busEndpoint, sendEndpoint, requestType, responseType)
     }
 
     /**

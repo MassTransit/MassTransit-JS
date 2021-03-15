@@ -63,6 +63,7 @@ var ReceiveEndpoint = /** @class */ (function (_super) {
         var _this_1 = _super.call(this, bus) || this;
         _this_1.queueName = queueName;
         _this_1.options = options;
+        _this_1.address = bus.brokerUrl.endsWith("/") ? bus.brokerUrl + queueName : bus.brokerUrl + "/" + queueName;
         _this_1._messageTypes = {};
         _this_1.on("channel", function (context) { return _this_1.onChannel(context); });
         return _this_1;
@@ -72,7 +73,7 @@ var ReceiveEndpoint = /** @class */ (function (_super) {
             this._messageTypes[messageType].on(listener);
         }
         else {
-            var deserializer = new serialization_1.MessageTypeDeserializer();
+            var deserializer = new serialization_1.MessageTypeDeserializer(this);
             this._messageTypes[messageType] = deserializer;
             deserializer.on(listener);
         }

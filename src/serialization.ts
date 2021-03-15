@@ -2,6 +2,7 @@ import {ConsumeContext} from "./consumeContext"
 import EventEmitter from "events"
 import {serialize, deserialize} from "class-transformer"
 import {SendContext} from "./sendContext"
+import {ReceiveEndpoint} from "./receiveEndpoint"
 
 export type MessageMap = Record<string, any>
 export type MessageHandler<T extends MessageMap> = (message: ConsumeContext<T>) => void
@@ -11,13 +12,19 @@ export interface MessageDeserializer {
 }
 
 export interface MessageTypeDeserializer<T extends MessageMap> extends MessageDeserializer {
-
     on(handler: MessageHandler<T>): void
 
     off(handler: MessageHandler<T>): void
 }
 
 export class MessageTypeDeserializer<T extends MessageMap> implements MessageTypeDeserializer<T> {
+    private readonly receiveEndpoint: ReceiveEndpoint
+
+    constructor(receiveEndpoint: ReceiveEndpoint) {
+        this.receiveEndpoint = receiveEndpoint
+
+    }
+
     private _emitter = new EventEmitter()
 
     on(handler: MessageHandler<T>): void {
@@ -30,7 +37,9 @@ export class MessageTypeDeserializer<T extends MessageMap> implements MessageTyp
 
     dispatch(json: string): void {
 
-        let context = deserialize(ConsumeContext, json)
+        let context = <ConsumeContext<T>>deserialize(ConsumeContext, json)
+
+        context.receiveEndpoint = this.receiveEndpoint
 
         this._emitter.emit("message", context)
     }

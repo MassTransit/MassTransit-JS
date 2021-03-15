@@ -1,26 +1,29 @@
 import masstransit from "../src/bus"
 import {Guid} from "guid-typescript"
-import {SubmitOrder} from "./messages"
+import {OrderSubmitted, SubmitOrder} from "./messages"
 import readline from "readline"
 
 const bus = masstransit()
 
 bus.receiveEndpoint("orders", endpoint => {
 
-    endpoint.handle<SubmitOrder>("urn:message:Contracts:SubmitOrder", context => {
+    endpoint.handle<SubmitOrder>("urn:message:Contracts:SubmitOrder", async context => {
 
-        console.log("Order Submitted, OrderId:", context.message.OrderId, "Amount:", context.message.Amount)
+        console.log("Order submission received, OrderId:", context.message.OrderId, "Amount:", context.message.Amount)
+
+        await context.respond<OrderSubmitted>({OrderId: context.message.OrderId}, send => {
+            send.setMessageType("OrderSubmitted", "Contracts")
+        })
     })
 })
 
-let endpoint = bus.sendEndpoint({queue: "orders"})
+let client = bus.requestClient<SubmitOrder, OrderSubmitted>({queue: "orders"}, "urn:message:Contracts:SubmitOrder", "urn:message:Contracts:OrderSubmitted")
 
 const submitOrder = setInterval(async () => {
     try {
-        await endpoint.send<SubmitOrder>({OrderId: Guid.create().toString(), Amount: 123.45}, x => {
-            x.requestId = Guid.create().toString()
-            x.setMessageType("SubmitOrder", "Contracts")
-        })
+        let response = await client.getResponse({OrderId: Guid.create().toString(), Amount: 123.45})
+
+        console.log("Order submitted", response.message.OrderId)
     }
     catch (e) {
         console.error("failed to submit order", e.message)

@@ -26,12 +26,15 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
     queueName: string
     options: ReceiveEndpointOptions
     private readonly _messageTypes: MessageMap
+    address: string
 
     constructor(bus: Bus, queueName: string, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions) {
         super(bus)
 
         this.queueName = queueName
         this.options = options
+
+        this.address = bus.brokerUrl.endsWith("/") ? bus.brokerUrl + queueName : bus.brokerUrl + "/" + queueName
 
         this._messageTypes = {}
 
@@ -43,7 +46,7 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
         if (this._messageTypes.hasOwnProperty(messageType)) {
             this._messageTypes[messageType].on(listener)
         } else {
-            let deserializer = new MessageTypeDeserializer<T>()
+            let deserializer = new MessageTypeDeserializer<T>(this)
             this._messageTypes[messageType] = deserializer
             deserializer.on(listener)
         }

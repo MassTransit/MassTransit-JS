@@ -62,7 +62,6 @@ export class Transport extends EventEmitter implements Transport {
         this.serializer = new JsonMessageSerializer()
         this.pendingPublishQueue = new Array<PendingPublish>()
 
-
         bus.on("connect", (context) => this.onConnect(context))
     }
 
@@ -82,7 +81,7 @@ export class Transport extends EventEmitter implements Transport {
         if (!destination || destination === "")
             destination = routingKey
 
-        send.destinationAddress = this.bus.brokerUrl + "/" + destination
+        send.destinationAddress = this.bus.brokerUrl.endsWith("/") ? this.bus.brokerUrl + destination : this.bus.brokerUrl + "/" + destination
 
         const body = this.serializer.serialize(send)
 

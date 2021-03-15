@@ -36,39 +36,63 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConsumeContext = void 0;
-var ConsumeContext = /** @class */ (function () {
-    function ConsumeContext() {
+exports.RequestClient = void 0;
+var guid_typescript_1 = require("guid-typescript");
+var PendingRequest = /** @class */ (function () {
+    function PendingRequest(requestId, resolve, reject) {
+        this.resolve = resolve;
+        this.reject = reject;
+        this.requestId = requestId;
     }
-    ConsumeContext.prototype.respond = function (message, cb) {
-        return __awaiter(this, void 0, void 0, function () {
-            var address, exchangeName, slashIndex, sendEndpoint;
+    return PendingRequest;
+}());
+var RequestClient = /** @class */ (function () {
+    function RequestClient(receiveEndpoint, sendEndpoint, requestType, responseType) {
+        var _this = this;
+        this.receiveEndpoint = receiveEndpoint;
+        this.sendEndpoint = sendEndpoint;
+        this.requestType = requestType;
+        this.responseType = responseType;
+        this.pendingRequests = {};
+        receiveEndpoint.handle(responseType, function (response) { return _this.onResponse(response); });
+    }
+    RequestClient.prototype.getResponse = function (request) {
+        var _this = this;
+        return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            var requestId;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!this.responseAddress) return [3 /*break*/, 2];
-                        address = new URL(this.responseAddress);
-                        exchangeName = address.pathname;
-                        if (exchangeName.startsWith("/"))
-                            exchangeName = exchangeName.substr(1);
-                        slashIndex = exchangeName.lastIndexOf("/");
-                        if (slashIndex > 0)
-                            exchangeName = exchangeName.substr(slashIndex + 1);
-                        sendEndpoint = this.receiveEndpoint.sendEndpoint({ exchange: exchangeName });
-                        return [4 /*yield*/, sendEndpoint.send(message, function (send) {
-                                send.requestId = _this.requestId;
-                                if (cb)
-                                    cb(send);
+                        requestId = guid_typescript_1.Guid.create().toString();
+                        this.pendingRequests[requestId] = new PendingRequest(requestId, resolve, reject);
+                        return [4 /*yield*/, this.sendEndpoint.send(request, function (x) {
+                                x.requestId = requestId;
+                                x.responseAddress = _this.receiveEndpoint.address;
+                                x.messageType = [_this.requestType];
                             })];
                     case 1:
                         _a.sent();
-                        _a.label = 2;
-                    case 2: return [2 /*return*/];
+                        return [2 /*return*/];
                 }
+            });
+        }); });
+    };
+    RequestClient.prototype.onResponse = function (context) {
+        return __awaiter(this, void 0, void 0, function () {
+            var pendingRequest;
+            return __generator(this, function (_a) {
+                if (context.requestId) {
+                    pendingRequest = this.pendingRequests[context.requestId];
+                    if (pendingRequest) {
+                        pendingRequest.resolve(context);
+                    }
+                    delete this.pendingRequests[context.requestId];
+                }
+                return [2 /*return*/];
             });
         });
     };
-    return ConsumeContext;
+    return RequestClient;
 }());
-exports.ConsumeContext = ConsumeContext;
+exports.RequestClient = RequestClient;

@@ -19,6 +19,7 @@ export declare class ReceiveEndpoint extends Transport implements ReceiveEndpoin
     queueName: string;
     options: ReceiveEndpointOptions;
     private readonly _messageTypes;
+    address: string;
     constructor(bus: Bus, queueName: string, options?: ReceiveEndpointOptions);
     handle<T extends Record<string, any>>(messageType: string, listener: (message: ConsumeContext<T>) => void): this;
     emitMessage(msg: ConsumeMessage): void;

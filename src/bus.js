@@ -70,6 +70,7 @@ var amqplib_1 = require("amqplib");
 var receiveEndpoint_1 = require("./receiveEndpoint");
 var util_1 = require("./util");
 var guid_typescript_1 = require("guid-typescript");
+var requestClient_1 = require("./requestClient");
 var MassTransitBus = /** @class */ (function (_super) {
     __extends(MassTransitBus, _super);
     function MassTransitBus(brokerUrl) {
@@ -199,6 +200,10 @@ var MassTransitBus = /** @class */ (function (_super) {
     };
     MassTransitBus.prototype.sendEndpoint = function (args) {
         return this.busEndpoint.sendEndpoint(args);
+    };
+    MassTransitBus.prototype.requestClient = function (args, requestType, responseType) {
+        var sendEndpoint = this.busEndpoint.sendEndpoint(args);
+        return new requestClient_1.RequestClient(this.busEndpoint, sendEndpoint, requestType, responseType);
     };
     /**
      * Connects a receive endpoint to the bus
