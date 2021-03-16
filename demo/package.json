@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "tsc",
-    "start": "node index.js"
+    "start": "docker-compose up -d && node index.js",
+    "down": "docker-compose down"
   },
   "devDependencies": {
     "masstransit-rabbitmq": "file:../"

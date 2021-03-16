@@ -5,7 +5,8 @@
   "main": "bus.js",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "jasmine-ts --config=jasmine.json"
   },
   "respository": {
     "type": "git",
@@ -20,12 +21,17 @@
   "dependencies": {
     "amqplib": "^0.7.1",
     "class-transformer": "^0.4.0",
-    "guid-typescript": "^1.0.9"
+    "guid-typescript": "^1.0.9",
+    "jasmine-spec-reporter": "^6.0.0"
   },
   "devDependencies": {
     "@types/amqplib": "^0.5.17",
+    "@types/jasmine": "^3.6.6",
     "@types/node": "^14.14.33",
-    "readline": "^1.3.0"
+    "jasmine-ts": "^0.3.0",
+    "readline": "^1.3.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^4.2.3"
   },
   "files": [
     "lib/**/*"
