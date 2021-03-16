@@ -9,9 +9,10 @@ import {Guid} from "guid-typescript"
 import {MessageMap} from "./serialization"
 import {RequestClient} from "./requestClient"
 import {MessageType} from "./messageType"
+import {HostSettings, RabbitMqHostAddress} from "./RabbitMqEndpointAddress"
 
 export interface Bus {
-    brokerUrl: string
+    hostAddress: RabbitMqHostAddress
 
     on(event: "connect", listener: (context: ConnectionContext) => void): this
 
@@ -31,17 +32,17 @@ export interface Bus {
 }
 
 class MassTransitBus extends EventEmitter implements Bus {
-    brokerUrl: string
+    hostAddress: RabbitMqHostAddress
     private stopped: boolean
     private connection?: Promise<Connection>
     private _cancelConnect: any
     private readonly _retryIntervalInSeconds: number
     private readonly busEndpoint: ReceiveEndpoint
 
-    constructor(brokerUrl: string) {
+    constructor(hostAddress: RabbitMqHostAddress) {
         super()
 
-        this.brokerUrl = brokerUrl
+        this.hostAddress = hostAddress
 
         this.setMaxListeners(0)
 
@@ -76,7 +77,7 @@ class MassTransitBus extends EventEmitter implements Bus {
             if (connection)
                 await connection.close()
 
-            console.log("Bus stopped", this.brokerUrl)
+            console.log("Bus stopped", this.hostAddress.toString())
         }
         catch (e) {
             console.error("failed to close bus", e.message)
@@ -98,10 +99,10 @@ class MassTransitBus extends EventEmitter implements Bus {
     async connect() {
         const _this = this
 
-        console.log("Connecting", this.brokerUrl)
+        console.log("Connecting", this.hostAddress.toString())
 
         try {
-            this.connection = connect(this.brokerUrl + "?heartbeat=60")
+            this.connection = connect(this.hostAddress + "?heartbeat=60")
 
             let connection = await this.connection
 
@@ -112,13 +113,13 @@ class MassTransitBus extends EventEmitter implements Bus {
                 }
             })
             connection.on("close", () => {
-                this.emit("disconnect", this.brokerUrl)
+                this.emit("disconnect", this.hostAddress)
                 this.scheduleReconnect()
             })
 
-            console.log("Connected", this.brokerUrl)
+            console.log("Connected", this.hostAddress.toString())
 
-            this.emit("connect", {brokerUrl: this.brokerUrl, connection: connection})
+            this.emit("connect", {hostAddress: this.hostAddress, connection: connection})
         }
         catch (e) {
             console.error("Connect failed", e.message)
@@ -169,7 +170,7 @@ class MassTransitBus extends EventEmitter implements Bus {
 
         if (cb) cb(endpoint)
 
-        this.connection?.then(connection => endpoint.onConnect({brokerUrl: this.brokerUrl, connection: connection}))
+        this.connection?.then(connection => endpoint.onConnect({hostAddress: this.hostAddress, connection: connection}))
 
         return endpoint
     }
@@ -180,34 +181,20 @@ export interface RequestClientArguments extends SendEndpointArguments {
     responseType: MessageType
 }
 
-interface BusOptions {
-    host?: string
-    port?: number
-    virtualHost?: string
+interface BusOptions extends HostSettings {
 }
 
 const defaults: BusOptions = {
-    host: "localhost",
+    host: (process.env.RABBITMQ_HOST && process.env.RABBITMQ_HOST.length > 0) ? process.env.RABBITMQ_HOST : "localhost",
+    virtualHost: (process.env.RABBITMQ_VHOST && process.env.RABBITMQ_VHOST.length > 0) ? process.env.RABBITMQ_VHOST : "/",
 }
 
 export default function masstransit(options: BusOptions = defaults): Bus {
-    let url = new URL("amqp://localhost/")
+    let settings: HostSettings = {...defaults, ...options}
 
-    let busOptions = {...defaults, ...options}
+    const hostAddress = new RabbitMqHostAddress(settings)
 
-    if (process.env.RABBITMQ_HOST && process.env.RABBITMQ_HOST.length > 0)
-        url.host = process.env.RABBITMQ_HOST
-
-    if (busOptions.host && busOptions.host.trim().length > 0)
-        url.host = busOptions.host
-    if (busOptions.port && busOptions.port > 0)
-        url.port = busOptions.port.toString()
-    if (busOptions.virtualHost && busOptions.virtualHost.length > 0)
-        url.pathname = busOptions.virtualHost.startsWith("/") ? busOptions.virtualHost : "/" + busOptions.virtualHost
-
-    let brokerUrl = url.toString()
-
-    let bus = new MassTransitBus(brokerUrl)
+    let bus = new MassTransitBus(hostAddress)
 
     process.on("SIGINT", async () => {
         await bus.stop()

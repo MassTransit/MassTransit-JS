@@ -8,6 +8,7 @@ import {SendEndpoint} from "./sendEndpoint"
 import {SendEndpointArguments, Transport} from "./transport"
 import {ChannelContext} from "./channelContext"
 import {MessageType} from "./messageType"
+import {EndpointSettings, RabbitMqEndpointAddress, RabbitMqHostAddress} from "./RabbitMqEndpointAddress"
 
 /**
  * Configure the receive endpoint, including any message handlers
@@ -20,6 +21,9 @@ export interface ReceiveEndpointConfigurator {
 }
 
 export interface ReceiveEndpoint {
+    hostAddress: RabbitMqHostAddress
+    address: RabbitMqEndpointAddress
+
     sendEndpoint(args: SendEndpointArguments): SendEndpoint
 }
 
@@ -27,7 +31,6 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
     queueName: string
     options: ReceiveEndpointOptions
     private readonly _messageTypes: MessageMap
-    address: string
 
     constructor(bus: Bus, queueName: string, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions) {
         super(bus)
@@ -35,7 +38,10 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
         this.queueName = queueName
         this.options = options
 
-        this.address = bus.brokerUrl.endsWith("/") ? bus.brokerUrl + queueName : bus.brokerUrl + "/" + queueName
+        let settings: EndpointSettings = {name: queueName, ...options}
+
+        this.hostAddress = bus.hostAddress
+        this.address = new RabbitMqEndpointAddress(bus.hostAddress, settings)
 
         this._messageTypes = {}
 

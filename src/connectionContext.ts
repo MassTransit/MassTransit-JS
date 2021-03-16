@@ -1,16 +1,17 @@
 import {Connection} from "amqplib"
+import {RabbitMqHostAddress} from "./RabbitMqEndpointAddress"
 
 export interface ConnectionContext {
     connection: Connection
-    brokerUrl: string
+    hostAddress: RabbitMqHostAddress
 }
 
 export class ConnectionContext implements ConnectionContext {
     connection: Connection
-    brokerUrl: string
+    hostAddress: RabbitMqHostAddress
 
-    constructor(connection: Connection, brokerUrl: string) {
+    constructor(connection: Connection, hostAddress: RabbitMqHostAddress) {
         this.connection = connection
-        this.brokerUrl = brokerUrl
+        this.hostAddress = hostAddress
     }
 }

@@ -6,11 +6,15 @@ import EventEmitter from "events"
 import {Bus} from "./bus"
 import {ConnectionContext} from "./connectionContext"
 import {ChannelContext} from "./channelContext"
+import {RabbitMqEndpointAddress} from "./RabbitMqEndpointAddress"
 
 export interface SendEndpointArguments {
     exchange?: string
     queue?: string
     routingKey?: string
+    durable?: boolean
+    autodelete?: boolean
+    exchangeType?: string
 }
 
 export interface Transport {
@@ -79,9 +83,9 @@ export class Transport extends EventEmitter implements Transport {
 
         let destination = exchange
         if (!destination || destination === "")
-
             destination = routingKey
-        send.destinationAddress = this.bus.brokerUrl.endsWith("/") ? this.bus.brokerUrl + destination : this.bus.brokerUrl + "/" + destination
+
+        send.destinationAddress = new RabbitMqEndpointAddress(this.bus.hostAddress, {name: destination}).toString()
 
         const body = this.serializer.serialize(send)
 

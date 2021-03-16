@@ -21,7 +21,7 @@ export class RequestClient<TRequest extends MessageMap, TResponse extends Messag
         this.requestType = requestType
         this.responseType = responseType
 
-        this.responseAddress = receiveEndpoint.address
+        this.responseAddress = receiveEndpoint.address.toString()
         this.responses = {}
 
         receiveEndpoint.handle<TResponse>(responseType, response => this.onResponse(response))

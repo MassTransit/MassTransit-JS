@@ -3,6 +3,7 @@ import {Host} from "./host"
 import {MessageMap} from "./serialization"
 import {SendContext} from "./sendContext"
 import {ReceiveEndpoint} from "./receiveEndpoint"
+import {RabbitMqEndpointAddress} from "./RabbitMqEndpointAddress"
 
 export interface ConsumeContext<T extends object> extends MessageContext {
     message: T;
@@ -32,15 +33,9 @@ export class ConsumeContext<T extends object> implements ConsumeContext<T> {
 
     async respond<T extends MessageMap>(message: T, cb?: (send: SendContext<T>) => void): Promise<void> {
         if (this.responseAddress) {
-            let address = new URL(this.responseAddress)
-            let exchangeName = address.pathname
-            if (exchangeName.startsWith("/"))
-                exchangeName = exchangeName.substr(1)
-            let slashIndex = exchangeName.lastIndexOf("/")
-            if (slashIndex > 0)
-                exchangeName = exchangeName.substr(slashIndex + 1)
+            let address = RabbitMqEndpointAddress.parse(this.receiveEndpoint.hostAddress, this.responseAddress)
 
-            let sendEndpoint = this.receiveEndpoint.sendEndpoint({exchange: exchangeName})
+            let sendEndpoint = this.receiveEndpoint.sendEndpoint({exchange: address.name, ...address})
 
             await sendEndpoint.send<T>(message, send => {
                 send.requestId = this.requestId
