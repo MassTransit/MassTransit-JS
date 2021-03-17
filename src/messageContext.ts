@@ -1,4 +1,4 @@
-import {Host} from "./host"
+import {Host} from './host';
 
 export interface MessageContext {
     messageId?: string
@@ -18,20 +18,20 @@ export interface MessageContext {
 }
 
 export class MessageContext implements MessageContext {
-    messageId?: string
-    requestId?: string
-    correlationId?: string
-    conversationId?: string
-    initiatorId?: string
-    expirationTime?: string
-    sourceAddress?: string
-    destinationAddress?: string
-    responseAddress?: string
-    faultAddress?: string
-    sentTime?: string
-    messageType?: Array<string>
-    headers?: object
-    host?: Host
+    messageId?: string;
+    requestId?: string;
+    correlationId?: string;
+    conversationId?: string;
+    initiatorId?: string;
+    expirationTime?: string;
+    sourceAddress?: string;
+    destinationAddress?: string;
+    responseAddress?: string;
+    faultAddress?: string;
+    sentTime?: string;
+    messageType?: Array<string>;
+    headers?: object;
+    host?: Host;
 }
 
 

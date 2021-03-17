@@ -1,5 +1,5 @@
-import {Connection} from "amqplib"
-import {RabbitMqHostAddress} from "./RabbitMqEndpointAddress"
+import {Connection} from 'amqplib';
+import {RabbitMqHostAddress} from './RabbitMqEndpointAddress';
 
 export interface ConnectionContext {
     connection: Connection
@@ -7,11 +7,11 @@ export interface ConnectionContext {
 }
 
 export class ConnectionContext implements ConnectionContext {
-    connection: Connection
-    hostAddress: RabbitMqHostAddress
+    connection: Connection;
+    hostAddress: RabbitMqHostAddress;
 
     constructor(connection: Connection, hostAddress: RabbitMqHostAddress) {
-        this.connection = connection
-        this.hostAddress = hostAddress
+        this.connection = connection;
+        this.hostAddress = hostAddress;
     }
 }

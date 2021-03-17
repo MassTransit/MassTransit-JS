@@ -15,8 +15,8 @@ export const defaultHost: Host = {
     frameworkVersion: process.version,
     operatingSystemVersion: process.platform,
     assembly: require.main?.filename,
-}
+};
 
 export function host(): Host {
-    return defaultHost
+    return defaultHost;
 }
