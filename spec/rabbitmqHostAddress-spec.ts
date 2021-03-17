@@ -1,4 +1,4 @@
-import {RabbitMqHostAddress} from "../src/RabbitMqEndpointAddress"
+import {RabbitMqHostAddress} from "../dist/RabbitMqEndpointAddress"
 
 describe("Specifying a URL host address", () => {
 

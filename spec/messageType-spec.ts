@@ -1,4 +1,4 @@
-import {MessageType} from "../lib/messageType"
+import {MessageType} from "../dist/messageType"
 
 describe("messageType", () => {
 
