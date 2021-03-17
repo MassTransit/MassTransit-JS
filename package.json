@@ -2,8 +2,8 @@
   "name": "masstransit-rabbitmq",
   "version": "0.1.0",
   "description": "MassTransit for JavaScript, RabbitMQ",
-  "main": "lib/bus.js",
-  "types": "lib/bus.d.ts",
+  "main": "dist/bus.js",
+  "typings": "dist/bus",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
@@ -18,7 +18,11 @@
     "url": "https://github.com/MassTransit/MassTransit-JS/issues"
   },
   "homepage": "https://github.com/MassTransit/MassTransit-JS",
-  "keywords": ["rabbitmq", "masstransit", "bus"],
+  "keywords": [
+    "rabbitmq",
+    "masstransit",
+    "bus"
+  ],
   "author": "Chris Patterson",
   "license": "Apache-2.0",
   "dependencies": {
@@ -37,6 +41,6 @@
     "typescript": "^4.2.3"
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ]
 }

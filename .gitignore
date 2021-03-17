@@ -1,6 +1,7 @@
 .idea
 node_modules
 lib
+dist
 src/*.js
 src/*.d.ts
 *.map
