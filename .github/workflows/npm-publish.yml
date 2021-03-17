@@ -1,3 +1,5 @@
+name: Publish NPM Package
+
 on: push
 
 jobs:
