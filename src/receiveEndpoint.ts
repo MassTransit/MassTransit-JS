@@ -51,18 +51,19 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
 
     private readonly _messageTypes: MessageMap;
 
-    constructor(bus: Bus, queueName: string, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions) {
+    constructor(bus: Bus, queueName: string, cb?: (cfg: ReceiveEndpointConfigurator) => void, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions) {
         super(bus);
 
         this.queueName = queueName;
         this.options = options;
+        this.hostAddress = bus.hostAddress;
+        this._messageTypes = {};
+
+        if (cb) cb(this);
 
         let settings: EndpointSettings = {name: queueName, ...options};
 
-        this.hostAddress = bus.hostAddress;
         this.address = new RabbitMqEndpointAddress(bus.hostAddress, settings);
-
-        this._messageTypes = {};
 
         this.on('channel', (context) => this.onChannel(context));
     }

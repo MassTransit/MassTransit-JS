@@ -48,9 +48,7 @@ class MassTransitBus extends EventEmitter implements Bus {
      */
     receiveEndpoint(queueName: string, cb?: (cfg: ReceiveEndpointConfigurator) => void, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions): ReceiveEndpoint {
 
-        let endpoint = new ReceiveEndpoint(this, queueName, {...defaultReceiveEndpointOptions, ...options});
-
-        if (cb) cb(endpoint);
+        let endpoint = new ReceiveEndpoint(this, queueName, cb, {...defaultReceiveEndpointOptions, ...options});
 
         this.connection?.then(connection => endpoint.onConnect({hostAddress: this.hostAddress, connection: connection}));
 

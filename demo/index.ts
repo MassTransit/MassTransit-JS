@@ -1,8 +1,8 @@
-import masstransit from "../src/bus"
 import {Guid} from "guid-typescript"
 import {OrderSubmitted, SubmitOrder} from "./messages"
 import readline from "readline"
-import {MessageType} from "../lib/messageType"
+import {MessageType} from '../dist/messageType';
+import masstransit from '../dist/bus';
 
 MessageType.setDefaultNamespace("Contracts")
 

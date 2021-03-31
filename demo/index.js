@@ -46,10 +46,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var bus_1 = __importDefault(require("../src/bus"));
 var guid_typescript_1 = require("guid-typescript");
 var readline_1 = __importDefault(require("readline"));
-var messageType_1 = require("../lib/messageType");
+var messageType_1 = require("../dist/messageType");
+var bus_1 = __importDefault(require("../dist/bus"));
 messageType_1.MessageType.setDefaultNamespace("Contracts");
 var bus = bus_1.default();
 bus.receiveEndpoint("orders", function (endpoint) {
