@@ -28,6 +28,7 @@
   "dependencies": {
     "amqplib": "^0.7.1",
     "class-transformer": "^0.4.0",
+    "events": "^3.3.0",
     "guid-typescript": "^1.0.9"
   },
   "devDependencies": {
