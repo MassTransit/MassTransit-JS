@@ -44,12 +44,14 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
             let deserializer = new MessageTypeDeserializer<T>(this);
             this._messageTypes[typeName] = deserializer;
             deserializer.on(listener);
+            this.boundEvents.push(messageType);
         }
 
         return this;
     }
 
     private readonly _messageTypes: MessageMap;
+    private readonly boundEvents: MessageType[] = [];
 
     constructor(bus: Bus, queueName: string, cb?: (cfg: ReceiveEndpointConfigurator) => void, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions) {
         super(bus);
@@ -118,6 +120,10 @@ export class ReceiveEndpoint extends Transport implements ReceiveEndpointConfigu
         let queue = await channel.assertQueue(this.queueName, this.options);
 
         await channel.bindQueue(this.queueName, this.queueName, '');
+
+        for (const messageType of this.boundEvents) {
+            await channel.bindExchange(this.queueName, messageType.toExchange(), '');
+        }
 
         console.log('Queue:', queue.queue, 'MessageCount:', queue.messageCount, 'ConsumerCount:', queue.consumerCount);
     }
