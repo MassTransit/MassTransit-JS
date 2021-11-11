@@ -84,7 +84,7 @@ class MassTransitBus extends EventEmitter implements Bus {
 
             console.log('Bus stopped', this.hostAddress.toString());
         }
-        catch (e) {
+        catch (e: any) {
             console.error('failed to close bus', e.message);
         }
     }
@@ -135,7 +135,7 @@ class MassTransitBus extends EventEmitter implements Bus {
         console.log('Connecting', this.hostAddress.toString());
 
         try {
-            this.connection = connect(this.hostAddress + '?heartbeat=60');
+            this.connection = connect(this.hostAddress + '?heartbeat=60') as unknown as Promise<Connection>;
 
             let connection = await this.connection;
 
@@ -154,7 +154,7 @@ class MassTransitBus extends EventEmitter implements Bus {
 
             this.emit('connect', {hostAddress: this.hostAddress, connection: connection});
         }
-        catch (e) {
+        catch (e: any) {
             console.error('Connect failed', e.message);
 
             this.scheduleReconnect();
