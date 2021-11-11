@@ -2,8 +2,8 @@
 node_modules
 lib
 dist
-src/*.js
-src/*.d.ts
+*.js
+*.d.ts
 *.map
 .DS_Store
 *.tgz
