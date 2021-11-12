@@ -127,7 +127,7 @@ export class Transport extends EventEmitter implements Transport {
         if (this.channel) {
             let channel = this.channel;
             return new Promise((resolve, reject) => {
-                const result = channel.publish(exchange, routingKey, body, {persistent: true},
+                const result = channel.publish(exchange, routingKey, body, {persistent: true, contentType: "application/vnd.masstransit+json"},
                     err => {
                         if (err) {
                             reject(err);
