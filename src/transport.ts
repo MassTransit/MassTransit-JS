@@ -116,6 +116,7 @@ export class Transport extends EventEmitter implements Transport {
             let pendingPublish = this.pendingPublishQueue.shift();
             if (!pendingPublish) break;
 
+            // TODO: resolve or reject pending publishes
             let {exchange, message, routingKey} = pendingPublish;
 
             await this.basicPublish(exchange, routingKey, message);
