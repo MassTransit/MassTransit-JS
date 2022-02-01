@@ -135,7 +135,7 @@ class MassTransitBus extends EventEmitter implements Bus {
         console.log('Connecting', this.hostAddress.toString());
 
         try {
-            this.connection = connect(this.hostAddress + '?heartbeat=60');
+            this.connection = connect(this.hostAddress + '?heartbeat=60', {clientProperties: {connection_name: this.hostAddress.name}});
 
             let connection = await this.connection;
 

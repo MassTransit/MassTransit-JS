@@ -4,11 +4,13 @@ export class RabbitMqHostAddress {
     virtualHost: string;
     heartbeat?: number;
     protocol: string;
+    name?: string;
 
     constructor(settings: HostSettings) {
         this.host = settings.host;
         this.virtualHost = settings.virtualHost;
         this.port = settings.port;
+        this.name = settings.name;
 
         if (settings.ssl) {
             this.protocol = 'amqps:';
@@ -113,6 +115,7 @@ export interface HostSettings {
     port?: number
     ssl?: boolean
     heartbeat?: number
+    name?: string
 }
 
 export class RabbitMqEndpointAddress {
