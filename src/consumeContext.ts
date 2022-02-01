@@ -4,6 +4,7 @@ import {MessageMap} from './serialization';
 import {SendContext} from './sendContext';
 import {ReceiveEndpoint} from './receiveEndpoint';
 import {RabbitMqEndpointAddress} from './RabbitMqEndpointAddress';
+import {AsyncReceiveEndpoint} from './AsyncReceiveEndpoint';
 
 export interface ConsumeContext<T extends object> extends MessageContext {
     message: T;
@@ -42,7 +43,7 @@ export class ConsumeContext<T extends object> implements ConsumeContext<T> {
 
     }
 
-    receiveEndpoint!: ReceiveEndpoint;
+    receiveEndpoint!: ReceiveEndpoint | AsyncReceiveEndpoint;
 }
 
 
