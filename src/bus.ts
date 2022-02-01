@@ -33,6 +33,7 @@ export interface Bus {
 
 class MassTransitBus extends EventEmitter implements Bus {
     hostAddress: RabbitMqHostAddress;
+    connectionName?: string;
 
     /**
      * Connects a receive endpoint to the bus
@@ -107,10 +108,11 @@ class MassTransitBus extends EventEmitter implements Bus {
     private readonly _retryIntervalInSeconds: number;
     private readonly busEndpoint: ReceiveEndpoint;
 
-    constructor(hostAddress: RabbitMqHostAddress) {
+    constructor(hostAddress: RabbitMqHostAddress, connectionName?: string) {
         super();
 
         this.hostAddress = hostAddress;
+        this.connectionName = connectionName;
 
         this.setMaxListeners(0);
 
@@ -135,7 +137,7 @@ class MassTransitBus extends EventEmitter implements Bus {
         console.log('Connecting', this.hostAddress.toString());
 
         try {
-            this.connection = connect(this.hostAddress + '?heartbeat=60') as unknown as Promise<Connection>;
+            this.connection = connect(this.hostAddress + '?heartbeat=60', {clientProperties: {connection_name: this.connectionName}});
 
             let connection = await this.connection;
 
@@ -181,6 +183,7 @@ export interface RequestClientArguments extends SendEndpointArguments {
 }
 
 interface BusOptions extends HostSettings {
+    connectionName?: string
 }
 
 const defaults: BusOptions = {
@@ -193,7 +196,7 @@ export default function masstransit(options: BusOptions = defaults): Bus {
 
     const hostAddress = new RabbitMqHostAddress(settings);
 
-    let bus = new MassTransitBus(hostAddress);
+    let bus = new MassTransitBus(hostAddress, options.connectionName);
 
     process.on('SIGINT', async () => {
         await bus.stop();
