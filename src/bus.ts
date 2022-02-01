@@ -10,6 +10,7 @@ import {MessageMap} from './serialization';
 import {RequestClient} from './requestClient';
 import {MessageType} from './messageType';
 import {HostSettings, RabbitMqHostAddress} from './RabbitMqEndpointAddress';
+import {AsyncReceiveEndpoint, AsyncReceiveEndpointConfigurator} from './AsyncReceiveEndpoint';
 
 export interface Bus {
     hostAddress: RabbitMqHostAddress
@@ -21,6 +22,7 @@ export interface Bus {
     on(event: 'error', listener: (err: any) => void): this
 
     receiveEndpoint(queueName: string, config: (endpoint: ReceiveEndpointConfigurator) => void, options?: ReceiveEndpointOptions): void
+    asyncReceiveEndpoint(queueName: string, config: (endpoint: AsyncReceiveEndpointConfigurator) => void, options?: ReceiveEndpointOptions): void
 
     sendEndpoint(args: SendEndpointArguments): SendEndpoint
 
@@ -50,6 +52,28 @@ class MassTransitBus extends EventEmitter implements Bus {
     receiveEndpoint(queueName: string, cb?: (cfg: ReceiveEndpointConfigurator) => void, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions): ReceiveEndpoint {
 
         let endpoint = new ReceiveEndpoint(this, queueName, cb, {...defaultReceiveEndpointOptions, ...options});
+
+        this.connection?.then(connection => endpoint.onConnect({hostAddress: this.hostAddress, connection: connection}));
+
+        return endpoint;
+    }
+
+    /**
+     * Connects a receive endpoint to the bus
+     * This endpoint waits for a promise to resolve before acknowledging received messages.
+     *
+     * @remarks
+     * Once connected, the receive endpoint will remain connected until disconnected
+     *
+     * @param queueName - The input queue name
+     * @param cb - The configuration callback, used to add message handlers, etc.
+     * @param options - Options for the receive endpoint, such as queue/exchange properties, etc.
+     * @returns Nothing yet, but should return the receive endpoint so that it can be stopped
+     *
+     */
+    asyncReceiveEndpoint(queueName: string, cb?: (cfg: AsyncReceiveEndpointConfigurator) => void, options: ReceiveEndpointOptions = defaultReceiveEndpointOptions): AsyncReceiveEndpoint {
+
+        let endpoint = new AsyncReceiveEndpoint(this, queueName, cb, {...defaultReceiveEndpointOptions, ...options});
 
         this.connection?.then(connection => endpoint.onConnect({hostAddress: this.hostAddress, connection: connection}));
 
